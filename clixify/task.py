@@ -1,7 +1,7 @@
 # task.py
 from .base import ClickUpResource
 # Assuming exceptions are in a utils subdirectory as per user's code
-from .utils.exceptions import ClickupyException, UserNotFoundByNameError, AmbiguousUserNameError
+from .utils.exceptions import ClixifyException, UserNotFoundByNameError, AmbiguousUserNameError
 import urllib.parse # For encoding tag names in URLs
 
 # Note: 'List' is imported locally inside methods needing it (add/remove_watcher)
@@ -137,7 +137,7 @@ class Task(ClickUpResource):
             Task: The instance itself after updating its data from the API response.
 
         Raises:
-            ClickupyException: If the API call fails.
+            ClixifyException: If the API call fails.
         """
         print(f"Updating Task ID: {self.id} with args: {kwargs}")
         endpoint = f"/task/{self.id}"
@@ -298,11 +298,11 @@ class Task(ClickUpResource):
             dict: API response.
 
         Raises:
-            ClickupyException, UserNotFoundByNameError, AmbiguousUserNameError, TypeError
+            ClixifyException, UserNotFoundByNameError, AmbiguousUserNameError, TypeError
         """
         from .list import List # Import locally to avoid circular dependency
         if not self.list or not self.list.get('id'):
-             raise ClickupyException(f"List context missing for Task {self.id}. Call task.get() first.")
+             raise ClixifyException(f"List context missing for Task {self.id}. Call task.get() first.")
 
         parent_list_id = self.list['id']
         print(f"Attempting to add watcher '{user_ref}' to Task ID: {self.id}...")
@@ -312,7 +312,7 @@ class Task(ClickUpResource):
              list_context = List(self.client, parent_list_id) # Temp List for context
              resolved_user_id = list_context._resolve_user_ref(user_ref)
              print(f"Resolved watcher reference '{user_ref}' to User ID: {resolved_user_id}")
-        except (UserNotFoundByNameError, AmbiguousUserNameError, TypeError, ClickupyException) as e:
+        except (UserNotFoundByNameError, AmbiguousUserNameError, TypeError, ClixifyException) as e:
              print(f"Error resolving watcher reference '{user_ref}': {e}")
              raise # Re-raise specific resolution error
 
@@ -326,7 +326,7 @@ class Task(ClickUpResource):
             return response_data
         except Exception as e:
              print(f"ERROR during Add Watcher API call (API details might be wrong). Error: {e}")
-             raise ClickupyException(f"Failed to add watcher via API: {e}")
+             raise ClixifyException(f"Failed to add watcher via API: {e}")
 
     def remove_watcher(self, user_ref):
         """
@@ -340,11 +340,11 @@ class Task(ClickUpResource):
             dict: Empty dict {} on success typically.
 
         Raises:
-            ClickupyException, UserNotFoundByNameError, AmbiguousUserNameError, TypeError
+            ClixifyException, UserNotFoundByNameError, AmbiguousUserNameError, TypeError
         """
         from .list import List # Import locally
         if not self.list or not self.list.get('id'):
-             raise ClickupyException(f"List context missing for Task {self.id}. Call task.get() first.")
+             raise ClixifyException(f"List context missing for Task {self.id}. Call task.get() first.")
 
         parent_list_id = self.list['id']
         print(f"Attempting to remove watcher '{user_ref}' from Task ID: {self.id}...")
@@ -354,7 +354,7 @@ class Task(ClickUpResource):
              list_context = List(self.client, parent_list_id)
              resolved_user_id = list_context._resolve_user_ref(user_ref)
              print(f"Resolved watcher reference '{user_ref}' to User ID: {resolved_user_id}")
-        except (UserNotFoundByNameError, AmbiguousUserNameError, TypeError, ClickupyException) as e:
+        except (UserNotFoundByNameError, AmbiguousUserNameError, TypeError, ClixifyException) as e:
              print(f"Error resolving watcher reference '{user_ref}': {e}")
              raise
 
@@ -369,7 +369,7 @@ class Task(ClickUpResource):
             return response_data
         except Exception as e:
             print(f"ERROR during Remove Watcher API call (API details might be wrong). Error: {e}")
-            raise ClickupyException(f"Failed to remove watcher via API: {e}")
+            raise ClixifyException(f"Failed to remove watcher via API: {e}")
 
     # --- Subtasks ---
     def create_subtask(self, name, **kwargs):
@@ -385,13 +385,13 @@ class Task(ClickUpResource):
             Task: A Task object representing the created subtask.
 
         Raises:
-            ClickupyException: If parent list ID is missing or creation fails.
+            ClixifyException: If parent list ID is missing or creation fails.
             ValueError: If name is empty.
         """
         if not name or not isinstance(name, str) or not name.strip():
              raise ValueError("Subtask name must be a non-empty string.")
         if not self.list or not self.list.get('id'):
-             raise ClickupyException(f"Cannot create subtask: Parent task {self.id} lacks list context. Call task.get() first.")
+             raise ClixifyException(f"Cannot create subtask: Parent task {self.id} lacks list context. Call task.get() first.")
 
         parent_list_id = self.list['id']
         subtask_name_cleaned = name.strip()
@@ -414,7 +414,7 @@ class Task(ClickUpResource):
             # Return a new Task object, initialized with response data
             return Task(self.client, subtask_id, data=response_data)
         else:
-            raise ClickupyException(f"Subtask creation failed: No ID in response. API Data: {response_data}")
+            raise ClixifyException(f"Subtask creation failed: No ID in response. API Data: {response_data}")
 
     # --- Dependencies ---
     def add_dependency(self, depends_on=None, dependency_of=None):

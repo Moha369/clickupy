@@ -4,11 +4,11 @@ import os
 import sys
 import time
 from dotenv import load_dotenv
-# Make sure 'clickupy' is the correct name of your library package directory
+# Make sure 'Clixify' is the correct name of your library package directory
 from clixify.client import ClickUpClient
 from clixify.team import Team  # <--- أضف هذا السطر هنا
 # Import custom exceptions if you want specific handling below
-from clixify.utils.exceptions import UserNotFoundByNameError, AmbiguousUserNameError, ClickupyException
+from clixify.utils.exceptions import UserNotFoundByNameError, AmbiguousUserNameError, ClixifyException
 
 # --- Diagnostics ---
 print("--- Python Environment ---")
@@ -32,8 +32,8 @@ team_manager = Team(client)
 workspace_name_to_find = "Testing"  # <--- *** CHANGE THIS ***
 assignee_name_to_resolve = "shaawa"             # <--- *** CHANGE THIS to a name likely to match ONE user ***
 # --- Test Resource Names ---
-test_space_name = "clickupy_AssignFocus_Space_NoDel" # Changed name slightly
-test_list_name = "clickupy_AssignFocus_List_NoDel"
+test_space_name = "Clixify_AssignFocus_Space_NoDel" # Changed name slightly
+test_list_name = "Clixify_AssignFocus_List_NoDel"
 task1_name = "Task 1 - Assign/Unassign Test (No Delete)"
 task2_name = "Task 2 - Dependency Test (No Delete)"
 subtask_name = "Subtask for Task 1 (No Delete)"
@@ -64,14 +64,14 @@ if my_workspace:
         print(f"\n=== Setup Phase ===")
         print(f"Attempting to create test Space: '{test_space_name}'...")
         test_space = my_workspace.create_space(test_space_name)
-        if not test_space or not test_space.id: raise ClickupyException("Space creation failed.")
+        if not test_space or not test_space.id: raise ClixifyException("Space creation failed.")
         print(f"Space created: '{test_space.name}' (ID: {test_space.id})")
         print("Pausing for 2 seconds...")
         time.sleep(2)
 
         print(f"Attempting to create test List: '{test_list_name}' in Space '{test_space.name}'...")
         test_list = test_space.create_list(test_list_name)
-        if not test_list or not test_list.id: raise ClickupyException("List creation failed.")
+        if not test_list or not test_list.id: raise ClixifyException("List creation failed.")
         print(f"List created: '{test_list.name}' (ID: {test_list.id})")
         print("Pausing for 2 seconds...")
         time.sleep(2)
@@ -96,7 +96,7 @@ if my_workspace:
         print("\nCreating base tasks...")
         # Create Task 1 initially unassigned
         task1 = test_list.create_task(name=task1_name)
-        if not task1 or not task1.id: raise ClickupyException("Task 1 creation failed.")
+        if not task1 or not task1.id: raise ClixifyException("Task 1 creation failed.")
         print(f"Task 1 created (unassigned): '{task1.name}' (ID: {task1.id})")
         time.sleep(1)
 
@@ -109,7 +109,7 @@ if my_workspace:
              print("Attempting to create Task 2 unassigned (assignee not resolved).")
 
         task2 = test_list.create_task(name=task2_name, **task2_payload)
-        if not task2 or not task2.id: raise ClickupyException("Task 2 creation failed.")
+        if not task2 or not task2.id: raise ClixifyException("Task 2 creation failed.")
         print(f"Task 2 created: '{task2.name}' (ID: {task2.id})")
         time.sleep(1)
 

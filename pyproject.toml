@@ -1,6 +1,6 @@
 [project]
 name = "clixify"
-version = "0.1.0"
+version = "0.1.1"
 description = "Clixify: Python Client for ClickUp API v2"
 readme = "README.md"
 authors = [

@@ -1,7 +1,7 @@
 # list.py
 from .base import ClickUpResource
 from .task import Task
-from .utils.exceptions import ClickupyException, UserNotFoundByNameError, AmbiguousUserNameError
+from .utils.exceptions import ClixifyException, UserNotFoundByNameError, AmbiguousUserNameError
 
 class List(ClickUpResource):
     """
@@ -179,7 +179,7 @@ class List(ClickUpResource):
             int: The resolved User ID.
 
         Raises:
-            UserNotFoundByNameError, AmbiguousUserNameError, TypeError, ClickupyException
+            UserNotFoundByNameError, AmbiguousUserNameError, TypeError, ClixifyException
         """
         if isinstance(user_ref, int):
             return user_ref # Assume valid ID
@@ -209,7 +209,7 @@ class List(ClickUpResource):
             username_match = matches[0].get('username', 'N/A')
             print(f"Resolved '{name_query}' to User ID: {user_id} ('{username_match}')")
             if user_id is None:
-                 raise ClickupyException(f"Matching user found for '{name_query}' but ID is missing.")
+                 raise ClixifyException(f"Matching user found for '{name_query}' but ID is missing.")
             return user_id
         elif len(matches) == 0:
             print(f"No user found matching '{name_query}' in List {self.id}.")
@@ -234,7 +234,7 @@ class List(ClickUpResource):
             Task: A Task object representing the created task.
 
         Raises:
-            UserNotFoundByNameError, AmbiguousUserNameError, TypeError, ValueError, ClickupyException
+            UserNotFoundByNameError, AmbiguousUserNameError, TypeError, ValueError, ClixifyException
         """
         if not name or not isinstance(name, str) or not name.strip():
              raise ValueError("Task name must be a non-empty string.")
@@ -275,7 +275,7 @@ class List(ClickUpResource):
         else:
             # Should not happen if API call returns 200 OK, indicates API issue or unexpected response format
             print(f"Error: Task creation API call succeeded but no Task ID found in response: {response_data}")
-            raise ClickupyException("Task creation succeeded but no Task ID found in response.")
+            raise ClixifyException("Task creation succeeded but no Task ID found in response.")
 
     def list_tasks(self, get_all=False, archived=False, page=0, order_by=None, reverse=None,
                    subtasks=None, statuses=None, include_closed=None, assignees=None,
