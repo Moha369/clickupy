@@ -1,5 +1,5 @@
 
-# Clickupy: Python Client for ClickUp API v2
+# Clixify: Python Client for ClickUp API v2
 
 A Python library providing an object-oriented interface to interact with the ClickUp API v2. This library aims to simplify common operations like managing workspaces, spaces, folders, lists, and tasks.
 
@@ -25,7 +25,7 @@ A Python library providing an object-oriented interface to interact with the Cli
 ## Installation
 
 ```bash
-pip install clickupy
+pip install clixify
 ```
 
 ### Requirements
@@ -55,7 +55,7 @@ CLICKUP_TOKEN=pk_YOUR_PERSONAL_API_TOKEN_HERE
 The library will automatically load the token from this environment variable. Alternatively, you can pass the token directly when initializing the client:
 
 ```python
-from clickupy.client import ClickUpClient
+from clixify.client import ClickUpClient
 client = ClickUpClient(token="pk_YOUR_PERSONAL_API_TOKEN_HERE")
 ```
 
@@ -64,8 +64,8 @@ client = ClickUpClient(token="pk_YOUR_PERSONAL_API_TOKEN_HERE")
 ```python
 import os
 from dotenv import load_dotenv
-from clickupy.client import ClickUpClient
-from clickupy.team import Team
+from clixify.client import ClickUpClient
+from clixify.team import Team
 
 load_dotenv()
 
@@ -96,16 +96,16 @@ else:
 
 ## Error Handling
 
-The library uses custom exceptions for specific known issues found in the `clickupy.exceptions` module:
+The library uses custom exceptions for specific known issues found in the `clixify.exceptions` module:
 
 - `UserNotFoundByNameError`: Raised during name resolution if a provided name query does not match any user.
 - `AmbiguousUserNameError`: Raised if a provided name query matches multiple users. Includes details of matches found.
-- `ClickupyException`: Base exception for other library-specific errors.
+- `clixifyException`: Base exception for other library-specific errors.
 
 Example:
 
 ```python
-from clickupy.exceptions import UserNotFoundByNameError, AmbiguousUserNameError
+from clixify.exceptions import UserNotFoundByNameError, AmbiguousUserNameError
 
 try:
     my_list.create_task(name="Test Ambiguity", assignees=["admin"])
