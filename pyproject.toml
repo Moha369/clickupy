@@ -1,7 +1,7 @@
 [project]
-name = "clickup"
+name = "clixify"
 version = "0.1.0"
-description = "Python Clickup: Python Client for ClickUp API v2"
+description = "Clixify: Python Client for ClickUp API v2"
 readme = "README.md"
 authors = [
     { name = "Mohammed Shaawa", email = "mshaawa963@gmail.com" }

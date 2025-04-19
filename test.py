@@ -5,10 +5,10 @@ import sys
 import time
 from dotenv import load_dotenv
 # Make sure 'clickupy' is the correct name of your library package directory
-from clickup.client import ClickUpClient
-from clickup.team import Team  # <--- أضف هذا السطر هنا
+from clixify.client import ClickUpClient
+from clixify.team import Team  # <--- أضف هذا السطر هنا
 # Import custom exceptions if you want specific handling below
-from clickup.utils.exceptions import UserNotFoundByNameError, AmbiguousUserNameError, ClickupyException
+from clixify.utils.exceptions import UserNotFoundByNameError, AmbiguousUserNameError, ClickupyException
 
 # --- Diagnostics ---
 print("--- Python Environment ---")
