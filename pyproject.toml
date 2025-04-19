@@ -1,0 +1,24 @@
+[project]
+name = "clickup"
+version = "0.1.0"
+description = "Python Clickup: Python Client for ClickUp API v2"
+readme = "README.md"
+authors = [
+    { name = "Mohammed Shaawa", email = "mshaawa963@gmail.com" }
+]
+license = { text = "MIT" }
+
+dependencies = [
+    "certifi==2025.1.31",
+    "charset-normalizer==3.4.1",
+    "idna==3.10",
+    "python-dotenv==1.1.0",
+    "requests==2.32.3",
+    "urllib3==2.4.0"
+]
+
+requires-python = ">=3.8"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"

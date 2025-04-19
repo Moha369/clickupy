@@ -5,10 +5,10 @@ import sys
 import time
 from dotenv import load_dotenv
 # Make sure 'clickupy' is the correct name of your library package directory
-from clickupy.client import ClickUpClient
-from clickupy.team import Team  # <--- أضف هذا السطر هنا
+from clickup.client import ClickUpClient
+from clickup.team import Team  # <--- أضف هذا السطر هنا
 # Import custom exceptions if you want specific handling below
-from clickupy.utils.exceptions import UserNotFoundByNameError, AmbiguousUserNameError, ClickupyException
+from clickup.utils.exceptions import UserNotFoundByNameError, AmbiguousUserNameError, ClickupyException
 
 # --- Diagnostics ---
 print("--- Python Environment ---")
