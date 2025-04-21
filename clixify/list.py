@@ -286,7 +286,7 @@ class List(ClickUpResource):
         Ref: https://clickup.com/api/clickupreference/operation/GetTasks/
 
         Args:
-            get_all (bool): Fetch all pages if True. Defaults to False.
+            get_all (bool): Fetch all pages if True, ignoring the 'page' arg. Defaults to False.
             archived (bool): Include archived tasks. Defaults to False.
             page (int): Page number (0-indexed). Used only if get_all=False. Defaults to 0.
             order_by (str): Sort field ('id', 'created', 'updated', 'due_date').
@@ -295,18 +295,17 @@ class List(ClickUpResource):
             statuses (list[str]): Filter by status names (case-insensitive).
             include_closed (bool): Include tasks with a closed status. Defaults to False.
             assignees (list[int]): Filter by assignee User IDs.
-            due_date_gt (int): Filter due date greater than (ms timestamp).
-            due_date_lt (int): Filter due date less than (ms timestamp).
-            # ... other date/custom field filters ...
+            # ... other filter args ...
 
         Returns:
-            list[Task]: A list of Task objects matching the criteria.
+            list[Task]: A list of Task objects matching the criteria. If get_all=True,
+                       this list contains tasks from all pages.
         """
         print(f"Fetching tasks for List '{self.name}' (ID: {self.id}) (GetAll: {get_all})...")
         endpoint = f"/list/{self.id}/task"
         base_params = {} # Base parameters used for all page requests
 
-        # Build base params dictionary from provided filters
+        # Build base params from provided filters
         if archived: base_params['archived'] = 'true'
         if order_by: base_params['order_by'] = order_by
         if reverse is not None: base_params['reverse'] = str(reverse).lower()
@@ -319,7 +318,6 @@ class List(ClickUpResource):
         if date_updated_gt: base_params['date_updated_gt'] = date_updated_gt
         if date_updated_lt: base_params['date_updated_lt'] = date_updated_lt
         if custom_fields: base_params['custom_fields'] = custom_fields
-        # Pass lists directly, requests library handles array formatting in query params
         if statuses: base_params['statuses'] = statuses
         if assignees: base_params['assignees'] = assignees
 
@@ -328,44 +326,48 @@ class List(ClickUpResource):
         current_page = 0
 
         if get_all:
-            # Fetch all pages sequentially
+            # === Pagination Logic: Fetch all pages sequentially ===
             print("Pagination mode: Fetching all pages...")
             while True:
-                page_params = base_params.copy()
-                page_params['page'] = current_page
+                page_params = base_params.copy() # Start with base filters
+                page_params['page'] = current_page # Add/set page number for this iteration
                 print(f"  Fetching page {current_page}...")
                 try:
+                    # Delay is automatically handled by self.client.request
                     response_data = self._request("GET", endpoint, params=page_params)
+                    # Extract the list of tasks for this page
                     tasks_list_data = response_data.get("tasks", [])
                 except Exception as e:
                     print(f"  ERROR fetching page {current_page}: {e}")
-                    break # Stop pagination on error
+                    # Optionally log error details or implement retry logic here
+                    break # Stop pagination on error for this example
 
                 if not tasks_list_data:
-                    # Stop when an empty task list is received, indicating the end
+                    # Stop when an empty task list is received - indicates the end
                     print(f"  No more tasks found on page {current_page}. Pagination finished.")
                     break
 
                 print(f"  Found {len(tasks_list_data)} tasks on page {current_page}.")
+                # Convert raw data to Task objects and add to the main list
                 for task_data in tasks_list_data:
                     all_task_objects.append(Task(self.client, task_data['id'], data=task_data))
 
-                current_page += 1
-                # Loop continues, delay is handled by client before next request
+                current_page += 1 # Move to the next page for the next iteration
+                # The loop continues, time.sleep is handled before the next request by the client
 
             print(f"Total tasks fetched across all pages: {len(all_task_objects)}")
-            return all_task_objects
+            return all_task_objects # Return the complete list of Task objects
 
         else:
-            # Fetch only the specified single page
+            # === Original Behavior: Fetch only the specified single page ===
             page_params = base_params.copy()
-            page_params['page'] = page
+            page_params['page'] = page # Use the page number passed as argument
             print(f"Pagination mode: Fetching single page {page}...")
             try:
                 response_data = self._request("GET", endpoint, params=page_params)
                 tasks_list_data = response_data.get("tasks", [])
                 print(f"Found {len(tasks_list_data)} tasks on page {page}.")
-                # Instantiate Task objects for this page
+                # Instantiate Task objects for this single page
                 tasks_on_page = [Task(self.client, td['id'], data=td) for td in tasks_list_data]
                 return tasks_on_page
             except Exception as e:
