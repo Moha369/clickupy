@@ -23,6 +23,8 @@ class Workspace:
         self.client = client # Store the client instance for requests
         # Local cache for Space objects belonging to this workspace
         self._spaces_cache = None
+        # Note: Workspace data from GET /team might contain more attributes.
+        # Consider adding a data param and _populate_attributes if needed.
 
     def __repr__(self):
         """String representation for the Workspace object."""
@@ -42,10 +44,10 @@ class Workspace:
         """
         # Note: Simple cache doesn't differentiate based on 'archived' status requested.
         if self._spaces_cache is not None and not force_refresh:
-            print(f"Using cached spaces list for Workspace {self.id}.")
+            # print(f"Using cached spaces list for Workspace {self.id}.") # Optional log
             return self._spaces_cache
 
-        print(f"Fetching spaces list from API for Workspace {self.id} (Archived: {archived})...")
+        # print(f"Fetching spaces list from API for Workspace {self.id} (Archived: {archived})...") # Optional log
         endpoint = f"/team/{self.id}/space"
         params = {'archived': str(archived).lower()}
         # Use the stored client instance to make the request
@@ -54,7 +56,7 @@ class Workspace:
 
         # Create Space objects and update cache
         self._spaces_cache = [Space(self.client, space['id'], space.get('name'), data=space) for space in spaces_list_data]
-        print(f"Found and cached {len(self._spaces_cache)} spaces in Workspace {self.id}.")
+        # print(f"Found and cached {len(self._spaces_cache)} spaces in Workspace {self.id}.") # Optional log
         return self._spaces_cache
 
     def create_space(self, name, **features):
@@ -77,7 +79,7 @@ class Workspace:
              raise ValueError("Space name must be a non-empty string.")
 
         space_name_cleaned = name.strip()
-        print(f"Creating space '{space_name_cleaned}' in Workspace '{self.name}' (ID: {self.id})...")
+        # print(f"Creating space '{space_name_cleaned}' in Workspace '{self.name}' (ID: {self.id})...") # Optional log
         endpoint = f"/team/{self.id}/space"
         payload = {"name": space_name_cleaned}
         # API expects features nested under a 'features' key
@@ -87,7 +89,7 @@ class Workspace:
         response_data = self.client.request("POST", endpoint, json=payload)
         # Create Space object from response
         new_space = Space(self.client, response_data['id'], response_data.get('name'), data=response_data)
-        print(f"Space '{new_space.name}' created successfully (ID: {new_space.id}).")
+        # print(f"Space '{new_space.name}' created successfully (ID: {new_space.id}).") # Optional log
 
         # Update cache if it exists
         if self._spaces_cache is not None:
@@ -108,8 +110,8 @@ class Workspace:
         Returns:
             Space: A Space object linked to this client and the given ID.
         """
-        print(f"Creating Space object instance for ID: {space_id} (data not fetched yet).")
-        # Creates the object instance without an API call. Assumes it belongs here contextually.
+        # print(f"Creating Space object instance for ID: {space_id} (data not fetched yet).") # Optional log
+        # Creates the object instance without an API call.
         return Space(self.client, space_id)
 
     # --- Optional Cache Search Methods ---
@@ -156,7 +158,7 @@ class Team(ClickUpResource):
             dict: The raw API response containing a list under the 'teams' key.
                   Example: {'teams': [{'id': '123', 'name': 'My Team', ...}]}
         """
-        print("Fetching all accessible Workspaces (Teams)...")
+        # print("Fetching all accessible Workspaces (Teams)...") # Optional log
         # Uses self._request inherited from ClickUpResource
         return self._request("GET", "/team")
 
@@ -170,19 +172,19 @@ class Team(ClickUpResource):
         Returns:
             Workspace | None: The Workspace object if found, otherwise None.
         """
-        print(f"Searching for Workspace named '{team_name}'...")
+        # print(f"Searching for Workspace named '{team_name}'...") # Optional log
         all_teams_data = self.get_all()
         found_workspace = None
         for team_data in all_teams_data.get("teams", []):
             # Case-insensitive comparison for the name
             if team_data.get("name", "").lower() == team_name.lower():
-                print(f"Found Workspace: '{team_data.get('name')}' (ID: {team_data.get('id')})")
+                # print(f"Found Workspace: '{team_data.get('name')}' (ID: {team_data.get('id')})") # Optional log
                 # Instantiate the Workspace object, passing the client instance
                 # Workspace needs the client to make its own API calls (e.g., list_spaces)
                 found_workspace = Workspace(team_data["id"], team_data["name"], self.client)
                 break # Stop after finding the first match
 
-        if found_workspace is None:
-             print(f"Workspace '{team_name}' not found among accessible teams.")
+        # if found_workspace is None: # Optional log
+             # print(f"Workspace '{team_name}' not found among accessible teams.")
 
         return found_workspace # Returns the Workspace object or None

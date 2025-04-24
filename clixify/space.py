@@ -6,9 +6,7 @@ from .list import List   # Required for type hinting and object creation
 class Space(ClickUpResource):
     """
     Represents an individual Space in ClickUp.
-    Provides methods for managing the Space itself (get, update, delete),
-    its Folders (list_folders, create_folder, get_folder),
-    and its folderless Lists (list_lists, create_list).
+    Provides methods for managing the Space itself, its Folders, and its folderless Lists.
     """
     def __init__(self, client, space_id, name=None, data=None):
         """
@@ -38,7 +36,7 @@ class Space(ClickUpResource):
     def _populate_attributes(self, data):
         """Helper method to populate instance attributes from a data dictionary."""
         self.name = data.get('name', self.name)
-        # Add other relevant space attributes here if needed
+        # Add other relevant space attributes here if needed from API response
         # self.features = data.get('features')
         # self.statuses = data.get('statuses')
 
@@ -55,12 +53,12 @@ class Space(ClickUpResource):
         Returns:
             Space: The instance itself after updating its data.
         """
-        print(f"Getting details for Space ID: {self.id}...")
+        # print(f"Getting details for Space ID: {self.id}...") # Optional log
         endpoint = f"/space/{self.id}"
         response_data = self._request("GET", endpoint)
         self._data = response_data
         self._populate_attributes(self._data) # Update attributes
-        print(f"Space details retrieved for '{self.name}'.")
+        # print(f"Space details retrieved for '{self.name}'.") # Optional log
         return self
 
     def update(self, name=None, **features_to_update):
@@ -89,11 +87,11 @@ class Space(ClickUpResource):
             print("Warning: No update data provided for Space.")
             return self
 
-        print(f"Updating Space ID: {self.id}...")
+        # print(f"Updating Space ID: {self.id}...") # Optional log
         response_data = self._request("PUT", endpoint, json=payload)
         self._data = response_data
         self._populate_attributes(self._data) # Update attributes
-        print(f"Space updated. Current name from API: '{self.name}'.")
+        # print(f"Space updated. Current name from API: '{self.name}'.") # Optional log
         return self
 
     def delete(self):
@@ -104,10 +102,10 @@ class Space(ClickUpResource):
         Returns:
             dict: The response from the API (often empty on success).
         """
-        print(f"Deleting Space ID: {self.id} ('{self.name}')...")
+        # print(f"Deleting Space ID: {self.id} ('{self.name}')...") # Optional log
         endpoint = f"/space/{self.id}"
         response_data = self._request("DELETE", endpoint)
-        print(f"Space deletion request sent for ID: {self.id}.")
+        # print(f"Space deletion request sent for ID: {self.id}.") # Optional log
         return response_data
 
     # --- Folder Management Methods within Space ---
@@ -125,10 +123,10 @@ class Space(ClickUpResource):
             list[Folder]: A list of Folder objects belonging to this Space.
         """
         if self._folders_cache is not None and not force_refresh:
-            print(f"Using cached folders list for Space {self.id}.")
+            # print(f"Using cached folders list for Space {self.id}.") # Optional log
             return self._folders_cache
 
-        print(f"Fetching folders list from API for Space {self.id} (Archived: {archived})...")
+        # print(f"Fetching folders list from API for Space {self.id} (Archived: {archived})...") # Optional log
         endpoint = f"/space/{self.id}/folder"
         params = {'archived': str(archived).lower()}
         response_data = self._request("GET", endpoint, params=params)
@@ -136,7 +134,7 @@ class Space(ClickUpResource):
 
         # Create Folder objects and update cache
         self._folders_cache = [Folder(self.client, fldr['id'], fldr.get('name'), data=fldr) for fldr in folder_list_data]
-        print(f"Found and cached {len(self._folders_cache)} folders in Space {self.id}.")
+        # print(f"Found and cached {len(self._folders_cache)} folders in Space {self.id}.") # Optional log
         return self._folders_cache
 
     def create_folder(self, name):
@@ -157,14 +155,14 @@ class Space(ClickUpResource):
             raise ValueError("Folder name must be a non-empty string.")
 
         folder_name_cleaned = name.strip()
-        print(f"Creating folder '{folder_name_cleaned}' in Space '{self.name}' (ID: {self.id})...")
+        # print(f"Creating folder '{folder_name_cleaned}' in Space '{self.name}' (ID: {self.id})...") # Optional log
         endpoint = f"/space/{self.id}/folder"
         payload = {"name": folder_name_cleaned}
 
         response_data = self._request("POST", endpoint, json=payload)
         # Create Folder object from response
         new_folder = Folder(self.client, response_data['id'], response_data.get('name'), data=response_data)
-        print(f"Folder '{new_folder.name}' created successfully (ID: {new_folder.id}).")
+        # print(f"Folder '{new_folder.name}' created successfully (ID: {new_folder.id}).") # Optional log
 
         # Update cache if it exists
         if self._folders_cache is not None:
@@ -187,15 +185,15 @@ class Space(ClickUpResource):
         """
         if not folder_name or not isinstance(folder_name, str) or not folder_name.strip():
             # Consider raising ValueError instead of printing and returning None
-            print("Error: Folder name must be a non-empty string.")
+            print("Warning: Folder name must be a non-empty string for get_folder.")
             return None
 
         folder_name_cleaned = folder_name.strip()
-        print(f"Searching for folder by name: '{folder_name_cleaned}' in Space '{self.name}'...")
+        # print(f"Searching for folder by name: '{folder_name_cleaned}' in Space '{self.name}'...") # Optional log
 
         try:
             # Ensure the folder list is loaded for searching
-            folder_list = self.list_folders(force_refresh=force_refresh) # Use the result directly
+            folder_list = self.list_folders(force_refresh=force_refresh)
         except Exception as e:
              print(f"Error listing folders while searching by name: {e}")
              return None # Cannot search if listing fails
@@ -205,10 +203,10 @@ class Space(ClickUpResource):
         for folder in folder_list:
             # Check if folder object has a name attribute before comparing
             if hasattr(folder, 'name') and folder.name and folder.name.lower() == search_name_lower:
-                print(f"Found folder: '{folder.name}' (ID: {folder.id})")
+                # print(f"Found folder: '{folder.name}' (ID: {folder.id})") # Optional log
                 return folder # Return the first match
 
-        print(f"Folder with name '{folder_name_cleaned}' not found in Space '{self.name}'.")
+        # print(f"Folder with name '{folder_name_cleaned}' not found in Space '{self.name}'.") # Optional log
         return None
 
     # --- Folderless List Management Methods within Space ---
@@ -226,18 +224,18 @@ class Space(ClickUpResource):
             list[List]: A list of folderless List objects belonging to this Space.
         """
         if self._folderless_lists_cache is not None and not force_refresh:
-            print(f"Using cached folderless lists for Space {self.id}.")
+            # print(f"Using cached folderless lists for Space {self.id}.") # Optional log
             return self._folderless_lists_cache
 
-        print(f"Fetching folderless lists from API for Space {self.id} (Archived: {archived})...")
-        endpoint = f"/space/{self.id}/list" # Endpoint for folderless lists
+        # print(f"Fetching folderless lists from API for Space {self.id} (Archived: {archived})...") # Optional log
+        endpoint = f"/space/{self.id}/list" # Endpoint for folderless lists in a space
         params = {'archived': str(archived).lower()}
         response_data = self._request("GET", endpoint, params=params)
         list_data = response_data.get("lists", [])
 
         # Create List objects and update cache
         self._folderless_lists_cache = [List(self.client, lst['id'], lst.get('name'), data=lst) for lst in list_data]
-        print(f"Found and cached {len(self._folderless_lists_cache)} folderless lists in Space {self.id}.")
+        # print(f"Found and cached {len(self._folderless_lists_cache)} folderless lists in Space {self.id}.") # Optional log
         return self._folderless_lists_cache
 
     def create_list(self, name):
@@ -258,14 +256,14 @@ class Space(ClickUpResource):
             raise ValueError("List name must be a non-empty string.")
 
         list_name_cleaned = name.strip()
-        print(f"Creating folderless list '{list_name_cleaned}' in Space '{self.name}' (ID: {self.id})...")
-        endpoint = f"/space/{self.id}/list" # Endpoint for folderless lists
+        # print(f"Creating folderless list '{list_name_cleaned}' in Space '{self.name}' (ID: {self.id})...") # Optional log
+        endpoint = f"/space/{self.id}/list" # Endpoint for folderless lists in a space
         payload = {"name": list_name_cleaned}
 
         response_data = self._request("POST", endpoint, json=payload)
         # Create List object from response
         new_list = List(self.client, response_data['id'], response_data.get('name'), data=response_data)
-        print(f"Folderless List '{new_list.name}' created successfully (ID: {new_list.id}).")
+        # print(f"Folderless List '{new_list.name}' created successfully (ID: {new_list.id}).") # Optional log
 
         # Update cache if it exists
         if self._folderless_lists_cache is not None:
